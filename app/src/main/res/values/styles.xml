@@ -1,0 +1,34 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="QMUI.Compat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/title</item>
+        <item name="colorPrimaryDark">@color/title</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <!--缓冲页面的主题-->
+    <style name="SplashActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@drawable/bg_start</item>
+    </style>
+    <!--radiobutton的主题-->
+    <style name="Bottom" />
+
+    <style name="Bottom.TabRadioButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:button">@null</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/radiobutton_text</item>
+    </style>
+    <!--TextViewBorder风格-->
+    <declare-styleable name="TextViewBorder">
+        <attr name="borderColor" format="color"/>
+    </declare-styleable>
+</resources>

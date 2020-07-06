@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">免跑行动</string>
+    <string name="attention1">数据库连接失败！首先检查网络是否连通，未能解决请联系管理员</string>
+    <string name="attention2">系统异常，请联系管理员</string>
+    <string name="attention3">账号或密码错误</string>
+    <string name="attention4">账号和密码不能为空</string>
+    <string name="contactInfo">1425114974@qq.com</string>
+    <string name="title_test">新生乒乓球赛</string>
+    <string name="dept">主办单位</string>
+    <string name="detail">活动详情</string>
+    <string name="remark">备注信息</string>
+    <string name="endTime">报名截止时间</string>
+    <string name="award">活动奖励</string>
+    <string name="site">活动地点</string>
+    <string name="time">活动时间</string>
+    <string name="number">活动名额</string>
+</resources>
