@@ -21,9 +21,9 @@ import dhu.cst.yinqingbo416.sports.Entry.User;
 
 public class DBUtils {
     private static String DRIVER = "com.mysql.jdbc.Driver";//mysql驱动
-    private static String URL = "jdbc:mysql://47.101.39.74:7080/pe?characterEncoding=utf-8&useSSL=false";//mysql连接url
-    private static String USER = "root";
-    private static String PASSWD = "ali7080";
+    private static String URL = "jdbc:mysql://服务器ip:端口号/数据库名称?characterEncoding=utf-8&useSSL=false";//mysql连接url
+    private static String USER = "用户名";
+    private static String PASSWD = "密码";
     private static String TAG = "DBUtils";
     //获取数据库连接
     private static Connection getConnection(){
