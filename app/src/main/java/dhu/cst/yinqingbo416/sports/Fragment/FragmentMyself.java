@@ -26,8 +26,8 @@ public class FragmentMyself extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_myself,container,false);
         groupListView = view.findViewById(R.id.fm_groupListView);
-        int height = QMUIResHelper.getAttrDimen(getContext(), com.qmuiteam.qmui.R.attr.qmui_list_item_height)+50;
-        int size = QMUIDisplayHelper.dp2px(getContext(), 40);
+        int height = QMUIResHelper.getAttrDimen(getContext(), com.qmuiteam.qmui.R.attr.qmui_list_item_height)+30;
+        int size = QMUIDisplayHelper.dp2px(getContext(), 35);
         //item点击事件
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -53,6 +53,9 @@ public class FragmentMyself extends Fragment {
         img = ContextCompat.getDrawable(getContext(),R.drawable.fingerprint);
         QMUICommonListItemView item6 = groupListView.createItemView(img,"指纹登录",null,
                 QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
+        img = ContextCompat.getDrawable(getContext(),R.drawable.setting);
+        QMUICommonListItemView item7 = groupListView.createItemView(img,"账号设置",null,
+                QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
         QMUIGroupListView.newSection(getContext())
                 .addItemView(item1,onClickListener)
                 .addItemView(item2,onClickListener)
@@ -60,6 +63,7 @@ public class FragmentMyself extends Fragment {
                 .addItemView(item4,onClickListener)
                 .addItemView(item5,onClickListener)
                 .addItemView(item6,onClickListener)
+                .addItemView(item7,onClickListener)
                 .setTitle(null).setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addTo(groupListView);
         return view;
