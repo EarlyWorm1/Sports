@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 
 import java.io.Serializable;
 import java.util.List;
@@ -39,7 +40,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView signIn;
     private TextView contactUs;
     private TextView forgetPassWord;
-    private mAlertDialog progressDialog;
+    private QMUITipDialog progressDialog;
     private TextInputLayout textInputLayout_user;
     private TextInputLayout textInputLayout_passWord;
     private boolean []flag = {false,false};
@@ -79,7 +80,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.login_btnLogin:
                 String strUserName = userName.getText().toString();
                 String strPassWord = passWord.getText().toString();
-                progressDialog = new mAlertDialog(LoginActivity.this,"Loding");
+                progressDialog = new QMUITipDialog.Builder(this)
+                        .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
+                        .setTipWord("正在登录")
+                        .create();
                 boolean flog = true;
                 errorMessage = "";
                 for(int i = 0;i < 2;i++){
@@ -90,7 +94,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     }
                 }
                 if(flog){
-                    progressDialog.progressbar_show();
+                    progressDialog.show();
                     User user = new User(strUserName,strPassWord);
                     checkLogin(user);
                 }else {
