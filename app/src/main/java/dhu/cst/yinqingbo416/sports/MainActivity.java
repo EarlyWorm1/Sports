@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         Tools.userName = preferences.getString("name","");
         Tools.userId = preferences.getString("id"," ");
         Tools.collegeId = preferences.getString("collegeId"," ");
+        Tools.fingerprint = preferences.getBoolean("fingerprint",false);
         fragmentManager = getSupportFragmentManager();
     }
 
