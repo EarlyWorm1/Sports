@@ -72,9 +72,8 @@ public class FragmentActivities extends BaseLazyFragment{
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void loadDataStart() {//加载数据
-        SharedPreferences preferences = Objects.requireNonNull(getActivity()).getSharedPreferences("stuData",MODE_PRIVATE);
-        collegeId = preferences.getString("collegeId"," ");
-        stuId = preferences.getString("id"," ");
+        collegeId = Tools.collegeId;
+        stuId = Tools.userId;
         new Thread(new Runnable() {
             @Override
             public void run() {
