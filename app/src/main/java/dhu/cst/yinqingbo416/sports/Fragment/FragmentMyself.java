@@ -1,10 +1,13 @@
 package dhu.cst.yinqingbo416.sports.Fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +21,7 @@ import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import dhu.cst.yinqingbo416.sports.R;
+import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 public class FragmentMyself extends Fragment {
     private QMUIGroupListView groupListView;
@@ -47,12 +51,33 @@ public class FragmentMyself extends Fragment {
         img = ContextCompat.getDrawable(getContext(),R.drawable.leave_words);
         QMUICommonListItemView item4 = groupListView.createItemView(img,"留言",null,
                 QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
-        img = ContextCompat.getDrawable(getContext(),R.drawable.push);
-        QMUICommonListItemView item5 = groupListView.createItemView(img,"消息推送",null,
+        img = ContextCompat.getDrawable(getContext(),R.drawable.run);
+        QMUICommonListItemView item5 = groupListView.createItemView(img,"课外锻炼查询",null,
                 QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
         img = ContextCompat.getDrawable(getContext(),R.drawable.fingerprint);
-        QMUICommonListItemView item6 = groupListView.createItemView(img,"指纹登录",null,
-                QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
+        QMUICommonListItemView item6 = groupListView.createItemView("指纹登录");
+        item6.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_SWITCH);
+        item6.setImageDrawable(img);
+        item6.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        item6.getSwitch().setChecked(Tools.fingerprint);
+        item6.getSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Toast.makeText(getContext(), "指纹登录已开启", Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
+                    editor.putBoolean("fingerprint",true);
+                    editor.apply();
+                    Tools.fingerprint = true;
+                }else {
+                    Toast.makeText(getContext(), "指纹登录已关闭", Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
+                    editor.putBoolean("fingerprint",false);
+                    editor.apply();
+                    Tools.fingerprint = false;
+                }
+            }
+        });
         img = ContextCompat.getDrawable(getContext(),R.drawable.setting);
         QMUICommonListItemView item7 = groupListView.createItemView(img,"账号设置",null,
                 QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
@@ -62,7 +87,12 @@ public class FragmentMyself extends Fragment {
                 .addItemView(item3,onClickListener)
                 .addItemView(item4,onClickListener)
                 .addItemView(item5,onClickListener)
-                .addItemView(item6,onClickListener)
+                .addItemView(item6, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                })
                 .addItemView(item7,onClickListener)
                 .setTitle(null).setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addTo(groupListView);
