@@ -51,6 +51,7 @@ public class Tools {
     public static String userId;//储存用户的学号
     public static String collegeId;//学院号
     public static boolean fingerprint;
+    public static boolean userCancelFingerprint = false;//用户主动取消指纹标志
     public static boolean [] loadPage = {false,false};//标记活动信息页面和已报名活动页面数据是否已经加载
     public static int currentPageNum = 1;//标记当前fragment的页码
     //用collegeName得到collegeId
