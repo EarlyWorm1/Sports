@@ -20,16 +20,23 @@ import com.qmuiteam.qmui.util.QMUIResHelper;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
+import dhu.cst.yinqingbo416.sports.MainActivity;
 import dhu.cst.yinqingbo416.sports.R;
 import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 public class FragmentMyself extends Fragment {
     private QMUIGroupListView groupListView;
+    private MainActivity mainActivity;
+    private QMUICommonListItemView item6;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_myself,container,false);
         groupListView = view.findViewById(R.id.fm_groupListView);
+        initGroupListView();
+        return view;
+    }
+    private void initGroupListView(){
         int height = QMUIResHelper.getAttrDimen(getContext(), com.qmuiteam.qmui.R.attr.qmui_list_item_height)+30;
         int size = QMUIDisplayHelper.dp2px(getContext(), 35);
         //item点击事件
@@ -55,27 +62,20 @@ public class FragmentMyself extends Fragment {
         QMUICommonListItemView item5 = groupListView.createItemView(img,"课外锻炼查询",null,
                 QMUICommonListItemView.HORIZONTAL,QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON,height);
         img = ContextCompat.getDrawable(getContext(),R.drawable.fingerprint);
-        QMUICommonListItemView item6 = groupListView.createItemView("指纹登录");
+        item6 = groupListView.createItemView("指纹登录");
         item6.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_SWITCH);
         item6.setImageDrawable(img);
         item6.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
         item6.getSwitch().setChecked(Tools.fingerprint);
+        Tools.currentFingerprint = Tools.fingerprint;
         item6.getSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    Toast.makeText(getContext(), "指纹登录已开启", Toast.LENGTH_SHORT).show();
-                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("fingerprint",true);
-                    editor.apply();
-                    Tools.fingerprint = true;
-                }else {
-                    Toast.makeText(getContext(), "指纹登录已关闭", Toast.LENGTH_SHORT).show();
-                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
-                    editor.putBoolean("fingerprint",false);
-                    editor.apply();
-                    Tools.fingerprint = false;
+                if(Tools.currentFingerprint == Tools.fingerprint){
+                    mainActivity = (MainActivity) getActivity();
+                    mainActivity.startFingerprint();
                 }
+                Tools.currentFingerprint = isChecked;
             }
         });
         img = ContextCompat.getDrawable(getContext(),R.drawable.setting);
@@ -96,6 +96,23 @@ public class FragmentMyself extends Fragment {
                 .addItemView(item7,onClickListener)
                 .setTitle(null).setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addTo(groupListView);
-        return view;
+    }
+    public void fingerprintSwitch(){//指纹识别成功
+        if(!Tools.fingerprint){//开启指纹识别
+            //Toast.makeText(getContext(), "指纹登录已开启", Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("fingerprint",true);
+            editor.apply();
+            Tools.fingerprint = true;
+        }else {//关闭指纹识别
+            //Toast.makeText(getContext(), "指纹登录已关闭", Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("fingerprint",false);
+            editor.apply();
+            Tools.fingerprint = false;
+        }
+    }
+    public void setFingerprintSwitch(boolean fingerprintSwitch){
+        item6.getSwitch().setChecked(fingerprintSwitch);
     }
 }
