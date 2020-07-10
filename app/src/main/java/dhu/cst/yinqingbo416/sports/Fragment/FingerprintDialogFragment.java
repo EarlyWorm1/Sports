@@ -18,6 +18,7 @@ import javax.crypto.Cipher;
 
 import dhu.cst.yinqingbo416.sports.MainActivity;
 import dhu.cst.yinqingbo416.sports.R;
+import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 @TargetApi(23)
 public class FingerprintDialogFragment extends DialogFragment {
@@ -122,6 +123,9 @@ public class FingerprintDialogFragment extends DialogFragment {
             mCancellationSignal.cancel();
             mCancellationSignal = null;
             isSelfCancelled = true;
+        }
+        if(Tools.currentFingerprint != Tools.fingerprint){//指纹开启不一致
+            mActivity.setFingerprintSwitch(Tools.fingerprint);
         }
     }
 
