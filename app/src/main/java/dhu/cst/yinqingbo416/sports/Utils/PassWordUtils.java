@@ -28,16 +28,15 @@ public class PassWordUtils {
      * @param context
      * @param number
      * @param password
-     * @param isRemember 是否记住密码
      */
-    public static void savePassword(Context context, String number, String password, boolean isRemember) {
+    public static void savePassword(Context context, String number, String password) {
         //对数据进行加密
         //得到key
-        SecretKey key = PassWordUtils.readKey(PassWordUtils.getPath("a.a"));
+        SecretKey key = PassWordUtils.readKey(PassWordUtils.getPath("password-key"));
         if (key == null) {
             key = get3DESKey();
             //保存key
-            PassWordUtils.saveKey(key, PassWordUtils.getPath("a.a"));
+            PassWordUtils.saveKey(key, PassWordUtils.getPath("password-key"));
         }
         //对得到number和password进行加密
         byte[] numberByte = encrypt3DES(number, key);
@@ -45,18 +44,17 @@ public class PassWordUtils {
         number = Base64.encodeToString(numberByte, Base64.DEFAULT);
         password = Base64.encodeToString(passwordByte, Base64.DEFAULT);
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("PWDInfo", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("number", number);
         editor.putString("password", password);
-        editor.putBoolean("isRemember", isRemember);
         editor.commit();
     }
 
     //读取账号密码
     public static String[] readPassword(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
-        String str[] = new String[]{sharedPreferences.getString("number", ""), sharedPreferences.getString("password", ""), String.valueOf(sharedPreferences.getBoolean("isRemember", false))};
+        SharedPreferences sharedPreferences = context.getSharedPreferences("PWDInfo", Context.MODE_PRIVATE);
+        String str[] = new String[]{sharedPreferences.getString("number", ""), sharedPreferences.getString("password", "")};
         str[0] = d(str[0]);
         str[1] = d(str[1]);
         return str;
@@ -65,7 +63,7 @@ public class PassWordUtils {
     private static String d(String str) {
         if (!TextUtils.isEmpty(str)) {
             //对数据进行解密
-            SecretKey key = readKey(PassWordUtils.getPath("a.a"));
+            SecretKey key = readKey(PassWordUtils.getPath("password-key"));
             if (key != null) {
                 str = decoder3DES(Base64.decode(str.getBytes(), Base64.DEFAULT), key);
             }
@@ -108,7 +106,7 @@ public class PassWordUtils {
         if (TextUtils.isEmpty(FileName)) {
             return null;
         }
-        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/yhcm");
+        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/yqb");
         if (!file.exists() || !file.isDirectory()) {
             file.mkdirs();
         }
