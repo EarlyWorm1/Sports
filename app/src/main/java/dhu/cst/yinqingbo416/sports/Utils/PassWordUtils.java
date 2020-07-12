@@ -29,7 +29,7 @@ public class PassWordUtils {
      * @param number
      * @param password
      */
-    public static void savePassword(Context context, String number, String password) {
+    public static void savePassword(Context context, String number, String password,String name) {
         //对数据进行加密
         //得到key
         SecretKey key = PassWordUtils.readKey(PassWordUtils.getPath("password-key"));
@@ -44,7 +44,7 @@ public class PassWordUtils {
         number = Base64.encodeToString(numberByte, Base64.DEFAULT);
         password = Base64.encodeToString(passwordByte, Base64.DEFAULT);
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("PWDInfo", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("number", number);
         editor.putString("password", password);
@@ -52,8 +52,8 @@ public class PassWordUtils {
     }
 
     //读取账号密码
-    public static String[] readPassword(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("PWDInfo", Context.MODE_PRIVATE);
+    public static String[] readPassword(Context context,String name) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
         String str[] = new String[]{sharedPreferences.getString("number", ""), sharedPreferences.getString("password", "")};
         str[0] = d(str[0]);
         str[1] = d(str[1]);
