@@ -30,6 +30,7 @@ import dhu.cst.yinqingbo416.sports.Entry.ActivityInfo;
 import dhu.cst.yinqingbo416.sports.Utils.CheckInput;
 import dhu.cst.yinqingbo416.sports.Entry.User;
 import dhu.cst.yinqingbo416.sports.CustomControl.mAlertDialog;
+import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
@@ -134,6 +135,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     Looper.loop();
                 }else if(ret == 1){
                     progressDialog.cancel();
+                    Tools.userId = userName.getText().toString();
+                    Tools.password = passWord.getText().toString();
                     Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                     startActivity(intent);
                     finish();
