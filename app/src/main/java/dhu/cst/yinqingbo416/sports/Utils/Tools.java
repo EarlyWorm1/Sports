@@ -49,8 +49,9 @@ public class Tools {
     static public List<Integer>applyActId = new ArrayList<>();//用于储存用户已报名的活动
     public static String userName;//储存用户的姓名
     public static String userId;//储存用户的学号
+    public static String password;//储存密码
     public static String collegeId;//学院号
-    public static boolean fingerprint;
+    public static boolean fingerprint;//是否开启指纹登录
     public static boolean currentFingerprint;//当前的指纹点击状态
     public static boolean [] loadPage = {false,false};//标记活动信息页面和已报名活动页面数据是否已经加载
     public static int currentPageNum = 1;//标记当前fragment的页码
