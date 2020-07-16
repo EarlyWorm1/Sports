@@ -342,6 +342,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Toast.makeText(this,"尚未开启指纹登录",Toast.LENGTH_SHORT).show();
         }else {
             User user = new User(userInfo[0],userInfo[1]);
+            progressDialog.show();
             checkLogin(user);
         }
     }
