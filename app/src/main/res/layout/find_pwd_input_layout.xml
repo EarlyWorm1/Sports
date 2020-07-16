@@ -37,8 +37,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:hintEnabled="false"
-            app:passwordToggleEnabled="true"
-            app:passwordToggleDrawable="@drawable/password_eyes"
             app:passwordToggleTint="#52A4ED"
             app:errorEnabled="true">
             <EditText
