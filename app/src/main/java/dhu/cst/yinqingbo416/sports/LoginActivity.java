@@ -4,11 +4,16 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.graphics.Color;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -23,13 +28,21 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 
 import java.io.Serializable;
+import java.security.KeyStore;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+import dhu.cst.yinqingbo416.sports.Fragment.FingerprintDialogFragment;
+import dhu.cst.yinqingbo416.sports.Fragment.FingerprintDialogFragment2;
 import dhu.cst.yinqingbo416.sports.Utils.DBUtils;
 import dhu.cst.yinqingbo416.sports.Entry.ActivityInfo;
 import dhu.cst.yinqingbo416.sports.Utils.CheckInput;
 import dhu.cst.yinqingbo416.sports.Entry.User;
 import dhu.cst.yinqingbo416.sports.CustomControl.mAlertDialog;
+import dhu.cst.yinqingbo416.sports.Utils.PassWordUtils;
 import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 
@@ -39,7 +52,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView btnLogin;
     private ImageView back;
     private TextView signIn;
-    private TextView contactUs;
+    private TextView fingerprint;
     private TextView forgetPassWord;
     private QMUITipDialog progressDialog;
     private TextInputLayout textInputLayout_user;
@@ -47,6 +60,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private boolean []flag = {false,false};
     private boolean []sign = {false,false};
     private String errorMessage = "";
+    private KeyStore keyStore;
+    private static final String DEFAULT_KEY_NAME = "default_key";
+    private FingerprintDialogFragment2 fingerprintDialogFragment2;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +81,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         btnLogin = findViewById(R.id.login_btnLogin);
         back = findViewById(R.id.login_title_back);
         signIn = findViewById(R.id.login_title_signIn);
-        contactUs = findViewById(R.id.login_contact);
+        fingerprint = findViewById(R.id.login_fingerprint);
         forgetPassWord = findViewById(R.id.login_forget);
         textInputLayout_user = findViewById(R.id.login_textInputLayout1);
         textInputLayout_passWord = findViewById(R.id.login_textInputLayout2);
         btnLogin.setOnClickListener(this);
         back.setOnClickListener(this);
         signIn.setOnClickListener(this);
-        contactUs.setOnClickListener(this);
+        fingerprint.setOnClickListener(this);
         forgetPassWord.setOnClickListener(this);
     }
     @Override
@@ -115,9 +131,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Intent intent1 = new Intent(LoginActivity.this,FindPwdActivity.class);
                 startActivity(intent1);
                 break;
-            case R.id.login_contact:
-                mAlertDialog mAlertdialog = new mAlertDialog(LoginActivity.this,"联系方式",getApplication().getString(R.string.contactInfo));
-                mAlertdialog.show();
+            case R.id.login_fingerprint:
+                //开启指纹登录页面
+                startFingerprint();
                 break;
         }
     }
@@ -250,6 +266,83 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     errorMessage += "、密码";
                 }
                 break;
+        }
+    }
+    //开启指纹识别
+    public void startFingerprint(){
+        if (supportFingerprint()) {
+            initKey();
+            initCipher();
+        }
+    }
+    //检查是否支持指纹识别
+    public boolean supportFingerprint(){
+        if (Build.VERSION.SDK_INT < 23) {
+            Toast.makeText(this, "您的系统版本过低，不支持指纹功能", Toast.LENGTH_SHORT).show();
+            return false;
+        } else {
+            KeyguardManager keyguardManager = getSystemService(KeyguardManager.class);
+            FingerprintManager fingerprintManager = getSystemService(FingerprintManager.class);
+            if (!fingerprintManager.isHardwareDetected()) {
+                Toast.makeText(this, "您的手机不支持指纹功能", Toast.LENGTH_SHORT).show();
+                return false;
+            } else if (!keyguardManager.isKeyguardSecure()) {
+                Toast.makeText(this, "您还未设置锁屏，请先设置锁屏并添加一个指纹", Toast.LENGTH_SHORT).show();
+                return false;
+            } else if (!fingerprintManager.hasEnrolledFingerprints()) {
+                Toast.makeText(this, "您至少需要在系统设置中添加一个指纹", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        return true;
+    }
+    //初始化对称密钥
+    @TargetApi(23)
+    private void initKey() {
+        try {
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(DEFAULT_KEY_NAME,
+                    KeyProperties.PURPOSE_ENCRYPT |
+                            KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                    .setUserAuthenticationRequired(true)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7);
+            keyGenerator.init(builder.build());
+            keyGenerator.generateKey();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    //初始化Cipher
+    @TargetApi(23)
+    private void initCipher() {
+        try {
+            SecretKey key = (SecretKey) keyStore.getKey(DEFAULT_KEY_NAME, null);
+            Cipher cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
+                    + KeyProperties.BLOCK_MODE_CBC + "/"
+                    + KeyProperties.ENCRYPTION_PADDING_PKCS7);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            showFingerPrintDialog(cipher);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    //显示指纹识别UI
+    private void showFingerPrintDialog(Cipher cipher) {
+        fingerprintDialogFragment2 = new FingerprintDialogFragment2();
+        fingerprintDialogFragment2.setCipher(cipher);
+        fingerprintDialogFragment2.show(getFragmentManager(), "fingerprint");
+    }
+    //指纹认证成功
+    public void onAuthenticated(){
+        String [] userInfo = PassWordUtils.readPassword(this,"FingerprintPoint");
+        if(userInfo[0] == "null"){
+            Toast.makeText(this,"尚未开启指纹登录",Toast.LENGTH_SHORT).show();
+        }else {
+            User user = new User(userInfo[0],userInfo[1]);
+            checkLogin(user);
         }
     }
 }
