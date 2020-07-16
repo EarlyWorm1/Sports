@@ -22,6 +22,7 @@ import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import dhu.cst.yinqingbo416.sports.MainActivity;
 import dhu.cst.yinqingbo416.sports.R;
+import dhu.cst.yinqingbo416.sports.Utils.PassWordUtils;
 import dhu.cst.yinqingbo416.sports.Utils.Tools;
 
 public class FragmentMyself extends Fragment {
@@ -104,12 +105,16 @@ public class FragmentMyself extends Fragment {
             editor.putBoolean("fingerprint",true);
             editor.apply();
             Tools.fingerprint = true;
+            //储存用户名+密码
+            PassWordUtils.savePassword(getContext(),Tools.userId,Tools.password,"FingerprintPoint");
         }else {//关闭指纹识别
             //Toast.makeText(getContext(), "指纹登录已关闭", Toast.LENGTH_SHORT).show();
             SharedPreferences.Editor editor = getActivity().getSharedPreferences("stuData", Context.MODE_PRIVATE).edit();
             editor.putBoolean("fingerprint",false);
             editor.apply();
             Tools.fingerprint = false;
+            //清除用户名+密码
+            PassWordUtils.savePassword(getContext(),"null","null","FingerprintPoint");
         }
     }
     public void setFingerprintSwitch(boolean fingerprintSwitch){
