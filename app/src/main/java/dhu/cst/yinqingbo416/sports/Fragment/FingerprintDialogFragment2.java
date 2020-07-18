@@ -106,7 +106,7 @@ public class FingerprintDialogFragment2 extends DialogFragment {
 
             @Override
             public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
-                Toast.makeText(mActivity, "指纹认证成功", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mActivity, "指纹认证成功", Toast.LENGTH_SHORT).show();
                 mActivity.onAuthenticated();
             }
 
