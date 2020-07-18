@@ -13,12 +13,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.Key;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class PassWordUtils {
 
@@ -30,20 +32,17 @@ public class PassWordUtils {
      * @param password
      */
     public static void savePassword(Context context, String number, String password,String name) {
-        //对数据进行加密
-        //得到key
-        SecretKey key = PassWordUtils.readKey(PassWordUtils.getPath("password-key"));
-        if (key == null) {
-            key = get3DESKey();
-            //保存key
-            PassWordUtils.saveKey(key, PassWordUtils.getPath("password-key"));
-        }
+        Log.d(TAG, "savePassword: 加密前的账号："+number);
+        Log.d(TAG, "savePassword: 加密前的密码："+password);
         //对得到number和password进行加密
-        byte[] numberByte = encrypt3DES(number, key);
-        byte[] passwordByte = encrypt3DES(password, key);
-        number = Base64.encodeToString(numberByte, Base64.DEFAULT);
-        password = Base64.encodeToString(passwordByte, Base64.DEFAULT);
-
+        try {
+            number = getDES(number,"YQBNumber");
+            password = getDES(password,"YQBPassWord");
+        } catch (Exception e) {
+            Log.d(TAG, "savePassword: "+e.toString());
+        }
+        Log.d(TAG, "savePassword: 加密后的账号："+number);
+        Log.d(TAG, "savePassword: 加密后的密码："+password);
         SharedPreferences sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("number", number);
@@ -55,130 +54,68 @@ public class PassWordUtils {
     public static String[] readPassword(Context context,String name) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
         String str[] = new String[]{sharedPreferences.getString("number", ""), sharedPreferences.getString("password", "")};
-        str[0] = d(str[0]);
-        str[1] = d(str[1]);
+        Log.d(TAG, "readPassword: 解密前的账号："+str[0]);
+        Log.d(TAG, "readPassword: 解密前的密码："+str[1]);
+        try {
+            str[0] = getDESOri(str[0],"YQBNumber");
+            str[1] = getDESOri(str[1],"YQBPassWord");
+        } catch (Exception e) {
+            Log.d(TAG, "savePassword: "+e.toString());
+        }
+        Log.d(TAG, "readPassword: 解密后的账号："+str[0]);
+        Log.d(TAG, "readPassword: 解密后的密码："+str[1]);
         return str;
     }
-
-    private static String d(String str) {
-        if (!TextUtils.isEmpty(str)) {
-            //对数据进行解密
-            SecretKey key = readKey(PassWordUtils.getPath("password-key"));
-            if (key != null) {
-                str = decoder3DES(Base64.decode(str.getBytes(), Base64.DEFAULT), key);
-            }
+    //获取加密密钥key
+    public static Key getKey(String keyString) {
+        byte[] keyStringByte = keyString.getBytes();
+        byte[] keyByte = new byte[8];
+        for(int i = 0; i<keyStringByte.length && i < keyByte.length; i++) {
+            keyByte[i] = keyStringByte[i];
         }
-        return str;
-    }
-
-    //保存key
-    public static boolean saveKey(SecretKey key, String path) {
-        try {
-            FileOutputStream fileOutputStream1 = new FileOutputStream(path);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-                    fileOutputStream1);
-            objectOutputStream.writeObject(key);
-            objectOutputStream.flush();
-            objectOutputStream.close();
-            return true;
-        } catch (Exception e) {
-            Log.d(TAG, "saveKey: "+e.toString());
-        }
-        return false;
-    }
-
-    //读取key
-    public static SecretKey readKey(String path) {
-        SecretKey key = null;
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(
-                    new FileInputStream(path));
-            key = (SecretKey) objectInputStream.readObject();
-            objectInputStream.close();
-        } catch (Exception e) {
-            Log.d(TAG, "readKey: "+e.toString());
-        }
+        Key key = new SecretKeySpec(keyByte,"DES");
         return key;
     }
+    //将byte数组转换成16进制String
+    public static String byteArr2HexStr(byte[] bytes) throws Exception {
+        StringBuffer sb = new StringBuffer(bytes.length*2);
+        for(int i = 0; i < bytes.length; i++){
+            if((bytes[i] & 0xFF) < 0x10)
+                sb.append("0");
+            sb.append(Integer.toHexString(bytes[i]&0xFF));
+        }
+        return sb.toString();
+    }
+    //将16进制string转换成byte数组
+    public static byte[] hexStr2ByteArr(String str) throws Exception {
 
-    //获取路径
-    public static String getPath(String FileName) {
-        if (TextUtils.isEmpty(FileName)) {
+        byte[] bytes = str.getBytes();
+
+        int len = bytes.length;
+        byte[] arr = new byte[len/2];
+        for(int i = 0; i < len; i=i+2) {
+            String tmp = new String(bytes,i,2);
+            arr[i/2] = (byte) Integer.parseInt(tmp,16);
+        }
+        return arr;
+    }
+    //对字符串进行DES加密
+    public static String getDES(String val, String key) throws Exception {
+        if(val == null || key == null)
             return null;
-        }
-        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/yqb");
-        if (!file.exists() || !file.isDirectory()) {
-            file.mkdirs();
-        }
+        Cipher encryptCipher = Cipher.getInstance("DES");
+        encryptCipher.init(Cipher.ENCRYPT_MODE,getKey(key));
+        byte[] cipherByte = encryptCipher.doFinal(val.getBytes());
 
-        File file1 = new File(file, FileName);
-        if (!file1.exists() || !file1.isFile()) {
-            try {
-                file1.createNewFile();
-            } catch (IOException e) {
-                Log.d(TAG, "getPath: "+e.toString());
-                return null;
-            }
-        }
-        return file1.getPath();
+        return byteArr2HexStr(cipherByte);
     }
-
-    /**
-     * 数据加解密3DES所需要的Key
-     */
-    public static SecretKey get3DESKey() {
-        try {
-            // 生成key
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("DESede");
-            keyGenerator.init(168);// can 168 or 112/new SecureRandom()
-            SecretKey secretKey = keyGenerator.generateKey();
-            byte[] bytesKey = secretKey.getEncoded();
-
-            // 转化key
-            DESedeKeySpec deSedeKeySpec = new DESedeKeySpec(bytesKey);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("DESede");
-            SecretKey generateSecret = factory.generateSecret(deSedeKeySpec);
-
-            return generateSecret;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d(TAG, "get3DESKey: "+e.toString());
-        }
-        return null;
+    //对DES加密后的16进制字符串进行解密
+    public static String getDESOri(String val, String key) throws Exception {
+        if(val == null || key == null)
+            return null;
+        Cipher decryptCipher = Cipher.getInstance("DES");
+        decryptCipher.init(Cipher.DECRYPT_MODE,getKey(key));
+        byte[] originalByte = decryptCipher.doFinal(hexStr2ByteArr(val));
+        return new String(originalByte);
     }
-
-    /**
-     * 数据加密3DES
-     */
-    private static byte[] encrypt3DES(String str, SecretKey generateSecret) {
-        try {
-            // 加密
-            Cipher cipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, generateSecret);
-            byte[] result = cipher.doFinal(str.getBytes("utf-8"));
-            return result;
-        } catch (Exception e) {
-            Log.d(TAG, "encrypt3DES: "+e.toString());
-        }
-        return null;
-    }
-
-    /**
-     * 数据解密3DES
-     */
-    private static String decoder3DES(byte[] str, SecretKey generateSecret) {
-        try {
-            // 加密
-            Cipher cipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, generateSecret);
-            Log.d(TAG, "decoder3DES: 2");
-            byte[] result = cipher.doFinal(str);
-            Log.d(TAG, "decoder3DES: 3");
-            return new String(result, "utf-8");
-        } catch (Exception e) {
-            Log.d(TAG, "decoder3DES: ");
-        }
-        return null;
-    }
-
 }
